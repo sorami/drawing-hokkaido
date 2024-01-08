@@ -1,11 +1,13 @@
 <script lang="ts">
+	import '@unocss/reset/tailwind-compat.css';
 	import 'virtual:uno.css';
+	import '../app.css';
 </script>
 
 <svelte:head>
 	<title>Drawing Hokkaido</title>
 </svelte:head>
 
-<main>
-	<h1 class="text-sm text-red-500">Welcome to SvelteKit</h1>
+<main class="grid place-items-center h-100vh">
+	<h1 class="text-2xl font-bold">北海道を描く</h1>
 </main>
