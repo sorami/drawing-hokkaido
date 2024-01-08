@@ -1,6 +1,6 @@
 import { defineConfig } from 'unocss';
 import presetUno from '@unocss/preset-uno';
-import { presetWebFonts } from 'unocss';
+import { presetWebFonts, presetIcons } from 'unocss';
 import transformerDirectives from '@unocss/transformer-directives';
 
 export default defineConfig({
@@ -8,7 +8,8 @@ export default defineConfig({
 		presetUno(),
 		presetWebFonts({
 			fonts: { sans: 'Zen Maru Gothic' }
-		})
+		}),
+		presetIcons()
 	],
 	transformers: [transformerDirectives()]
 });

@@ -1,6 +1,6 @@
 body {
-	@apply font-base;
 	@apply font-sans;
+	@apply text-neutral-700;
 }
 
 a,
