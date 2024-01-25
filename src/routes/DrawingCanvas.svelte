@@ -7,15 +7,15 @@
 	export let strokeWidth: number;
 	export let strokeColor: string;
 
-	let canvas: HTMLCanvasElement;
-	let context: CanvasRenderingContext2D | null;
-
 	type StrokeItem = {
 		points: [number, number][];
 		style: string;
 		width: number;
 	};
 	let strokes: StrokeItem[] = [];
+
+	let canvas: HTMLCanvasElement;
+	let context: CanvasRenderingContext2D | null;
 
 	onMount(() => {
 		context = canvas.getContext('2d');
@@ -35,12 +35,13 @@
 				style: strokeColor,
 				width: strokeWidth
 			};
-			strokes.push(currentStroke);
+			strokes = [...strokes, currentStroke];
 			return currentStroke;
 		}
 
 		function dragged({ subject, x, y }: { subject: StrokeItem; x: number; y: number }) {
 			subject.points.push([x / scale, y / scale]);
+			strokes = strokes;
 		}
 
 		function render() {
@@ -84,6 +85,10 @@
 <div class="flex flex-col gap-4">
 	<div class="b-3 b-neutral-5 rounded-lg">
 		<canvas width={canvasWidth} height={canvasHeight} bind:this={canvas} />
+	</div>
+
+	<div>
+		strokes: {JSON.stringify(strokes)}
 	</div>
 
 	<button
