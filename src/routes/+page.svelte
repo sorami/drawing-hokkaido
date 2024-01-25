@@ -21,7 +21,7 @@
 	<h1 class="text-center text-xl font-bold">「北海道のかたち」を描いてください</h1>
 </header>
 
-<main class="flex flex-col gap-8 justify-center items-center">
+<main class="flex flex-col gap-16 justify-center items-center">
 	<DrawingCanvas {canvasWidth} {canvasHeight} {strokeWidth} {strokeColor} />
 
 	<div class="flex gap-16">

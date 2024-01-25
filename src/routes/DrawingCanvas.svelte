@@ -7,6 +7,12 @@
 	export let strokeWidth: number;
 	export let strokeColor: string;
 
+	type Session = {
+		strokes: StrokeItem[];
+		timestamp: number;
+	};
+	let sessions: Session[] = [];
+
 	type StrokeItem = {
 		points: [number, number][];
 		style: string;
@@ -44,27 +50,6 @@
 			strokes = strokes;
 		}
 
-		function render() {
-			if (!context) return;
-
-			const curve = d3.curveBasis(context);
-
-			context.clearRect(0, 0, canvasWidth, canvasHeight);
-			for (const stroke of strokes) {
-				context.strokeStyle = stroke.style;
-				context.lineWidth = stroke.width;
-				context.beginPath();
-				curve.lineStart();
-				for (const point of stroke.points) {
-					curve.point(...point);
-				}
-				if (stroke.points.length === 1) curve.point(...stroke.points[0]);
-				curve.lineEnd();
-				context.stroke();
-			}
-			context.canvas.dispatchEvent(new CustomEvent('input'));
-		}
-
 		d3.select(context.canvas).call(
 			d3
 				.drag()
@@ -75,10 +60,47 @@
 		);
 	});
 
+	function render() {
+		if (!context) return;
+
+		const curve = d3.curveBasis(context);
+
+		context.clearRect(0, 0, canvasWidth, canvasHeight);
+		for (const stroke of strokes) {
+			context.strokeStyle = stroke.style;
+			context.lineWidth = stroke.width;
+			context.beginPath();
+			curve.lineStart();
+			for (const point of stroke.points) {
+				curve.point(...point);
+			}
+			if (stroke.points.length === 1) curve.point(...stroke.points[0]);
+			curve.lineEnd();
+			context.stroke();
+		}
+		context.canvas.dispatchEvent(new CustomEvent('input'));
+	}
+
 	const clearCanvas = () => {
 		if (!context) return;
 		strokes = [];
 		context.clearRect(0, 0, canvasWidth, canvasHeight);
+	};
+
+	const saveSession = () => {
+		sessions = [
+			...sessions,
+			{
+				strokes: strokes,
+				timestamp: Date.now()
+			}
+		];
+		clearCanvas();
+	};
+
+	const showSession = (session: Session) => {
+		strokes = session.strokes;
+		render();
 	};
 </script>
 
@@ -87,8 +109,34 @@
 		<canvas width={canvasWidth} height={canvasHeight} bind:this={canvas} />
 	</div>
 
-	<button
-		class="w-24 p-1 rounded-lg font-bold flex justify-center items-center"
-		on:click={clearCanvas}>Clear</button
-	>
+	<div class="flex justify-center items-center gap-12">
+		<button
+			class="w-24 p-2 bg-gray-700 text-white rounded-full flex justify-center items-center hover:opacity-75"
+			on:click={clearCanvas}>全消去</button
+		>
+		<button
+			class="w-24 p-2 bg-gray-700 text-white rounded-full flex justify-center items-center hover:opacity-75"
+			on:click={saveSession}>保存</button
+		>
+	</div>
+
+	<div class="mt-6 flex gap-6">
+		<h2>セッション</h2>
+		<div class="flex flex-wrap gap-3 max-w-lg">
+			{#each sessions as session}
+				<button
+					class="bg-gray-700 text-white text-sm px-2 py-1 rounded"
+					on:click={showSession(session)}
+				>
+					{new Date(session.timestamp).toLocaleString()}
+				</button>
+			{/each}
+		</div>
+	</div>
 </div>
+
+<style>
+	ul {
+		list-style: disc;
+	}
+</style>
