@@ -7,21 +7,23 @@
 	import DrawingCanvas from './DrawingCanvas.svelte';
 
 	let strokeWidth = 3;
-	let strokeColor = '#333333';
+	let strokeColor = '#334155';
 
-	let canvasWidth = 600;
-	let canvasHeight = 300;
+	let canvasWidth = 400;
+	let canvasHeight = canvasWidth / 1.618;
 </script>
 
 <svelte:head>
 	<title>Drawing Hokkaido</title>
 </svelte:head>
 
-<header class="flex justify-center my-8">
-	<h1 class="text-3xl font-bold">北海道を描く</h1>
+<header class="bg-gray-700 py-2 mb-3 text-white shadow">
+	<h1 class="text-center text-xl font-bold">「北海道のかたち」を描いてください</h1>
 </header>
 
 <main class="flex flex-col gap-8 justify-center items-center">
+	<DrawingCanvas {canvasWidth} {canvasHeight} {strokeWidth} {strokeColor} />
+
 	<div class="flex gap-16">
 		<StrokeWidthSlider bind:strokeWidth />
 		<div class="flex gap-2 justify-center items-center">
@@ -29,6 +31,4 @@
 			{strokeColor}
 		</div>
 	</div>
-
-	<DrawingCanvas {canvasWidth} {canvasHeight} {strokeWidth} {strokeColor} />
 </main>

@@ -83,12 +83,8 @@
 </script>
 
 <div class="flex flex-col gap-4">
-	<div class="b-3 b-neutral-5 rounded-lg">
+	<div class="b-3 b-gray-600 rounded">
 		<canvas width={canvasWidth} height={canvasHeight} bind:this={canvas} />
-	</div>
-
-	<div>
-		strokes: {JSON.stringify(strokes)}
 	</div>
 
 	<button
