@@ -9,7 +9,7 @@
 	let strokeWidth = 3;
 	let strokeColor = '#334155';
 
-	let canvasWidth = 400;
+	let canvasWidth = 500;
 	let canvasHeight = canvasWidth / 1.618;
 </script>
 

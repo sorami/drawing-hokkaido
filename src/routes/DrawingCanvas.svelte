@@ -117,11 +117,11 @@
 		<canvas width={canvasWidth} height={canvasHeight} bind:this={canvas} />
 	</div>
 
-	<div class="flex justify-center items-center gap-12">
-		<!-- <button
+	<div class="mt-3 flex justify-center items-center gap-12">
+		<button
 			class="w-24 p-2 bg-gray-700 text-white rounded-full flex justify-center items-center hover:opacity-75"
 			on:click={clearCanvas}>全消去</button
-		> -->
+		>
 		<button
 			class="w-24 p-2 bg-gray-700 text-white rounded-full flex justify-center items-center hover:opacity-75"
 			on:click={saveSession}>保存</button
