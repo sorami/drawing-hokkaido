@@ -102,6 +102,14 @@
 		strokes = session.strokes;
 		render();
 	};
+
+	const showAllSessions = () => {
+		strokes = sessions.flatMap((session) => session.strokes);
+		if (!context) return;
+		context.globalAlpha = 0.5;
+		render();
+		context.globalAlpha = 1;
+	};
 </script>
 
 <div class="flex flex-col gap-4">
@@ -110,28 +118,34 @@
 	</div>
 
 	<div class="flex justify-center items-center gap-12">
-		<button
+		<!-- <button
 			class="w-24 p-2 bg-gray-700 text-white rounded-full flex justify-center items-center hover:opacity-75"
 			on:click={clearCanvas}>全消去</button
-		>
+		> -->
 		<button
 			class="w-24 p-2 bg-gray-700 text-white rounded-full flex justify-center items-center hover:opacity-75"
 			on:click={saveSession}>保存</button
 		>
 	</div>
 
-	<div class="mt-6 flex gap-6">
-		<h2>セッション</h2>
-		<div class="flex flex-wrap gap-3 max-w-lg">
-			{#each sessions as session}
-				<button
-					class="bg-gray-700 text-white text-sm px-2 py-1 rounded"
-					on:click={showSession(session)}
-				>
-					{new Date(session.timestamp).toLocaleString()}
-				</button>
-			{/each}
-		</div>
+	<hr class="my-6" />
+
+	<div class="flex justify-center items-center my-6" class:opacity-30={sessions.length == 0}>
+		<button
+			class="w-64 p-2 bg-gray-700 text-white rounded-full flex justify-center items-center hover:opacity-75"
+			on:click={showAllSessions}>全セッションを重ねて表示</button
+		>
+	</div>
+
+	<div class="flex flex-wrap gap-3 max-w-3xl">
+		{#each sessions as session}
+			<button
+				class="bg-gray-700 text-white text-sm px-2 py-1 rounded"
+				on:click={showSession(session)}
+			>
+				{new Date(session.timestamp).toLocaleString()}
+			</button>
+		{/each}
 	</div>
 </div>
 
