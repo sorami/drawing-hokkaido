@@ -15,16 +15,16 @@
 	// Canvas - always keep the aspect ratio
 	const canvasMargin = { width: 30, height: 80 };
 	const canvasAspectRatio = 2360 / 1640; // iPad Air - 2360 x 1640
-	let canvasWidth = 2360 - canvasMargin.width;
+	let canvasWidth = 2360 / 2 - canvasMargin.width;
 	let canvasHeight = canvasWidth / canvasAspectRatio;
 	const handleResize = () => {
 		if (window.innerHeight < window.innerWidth) {
 			// landscape
-			canvasHeight = Math.min(window.innerHeight, 1640) - canvasMargin.height;
+			canvasHeight = Math.min(window.innerHeight, 1640 / 2) - canvasMargin.height;
 			canvasWidth = canvasHeight * canvasAspectRatio;
 		} else {
 			// portrait
-			canvasWidth = Math.min(window.innerWidth, 2360) - canvasMargin.width;
+			canvasWidth = Math.min(window.innerWidth, 2360 / 2) - canvasMargin.width;
 			canvasHeight = canvasWidth / canvasAspectRatio;
 		}
 	};
