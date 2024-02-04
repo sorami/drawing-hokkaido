@@ -73,6 +73,25 @@
 		context.canvas.dispatchEvent(new CustomEvent('input'));
 	}
 
+	export function renderStrokes(thisStrokes: Stroke[]) {
+		if (!context) return;
+		const curve = d3.curveBasis(context);
+
+		for (const stroke of thisStrokes) {
+			context.strokeStyle = stroke.style;
+			context.lineWidth = stroke.width;
+			context.beginPath();
+			curve.lineStart();
+			for (const point of stroke.points) {
+				curve.point(point[0], point[1]);
+			}
+			if (stroke.points.length === 1) curve.point(stroke.points[0][0], stroke.points[0][1]);
+			curve.lineEnd();
+			context.stroke();
+		}
+		context.canvas.dispatchEvent(new CustomEvent('input'));
+	}
+
 	export function render() {
 		if (!context) return;
 		context.clearRect(0, 0, canvasWidth, canvasHeight);

@@ -3,6 +3,7 @@
 
 	export let showSessionList: boolean;
 	export let sessions: Session[];
+	export let showSession: (session: Session) => void;
 </script>
 
 {#if showSessionList}
@@ -19,7 +20,9 @@
 			<ul class="text-sm">
 				{#each sessions.sort((a, b) => b.endTime - a.endTime) as session}
 					<li>
-						{new Date(session.endTime).toISOString()}
+						<button class="bg-gray-700 underline" on:click={() => showSession(session)}>
+							{new Date(session.endTime).toISOString()}
+						</button>
 					</li>
 				{/each}
 			</ul>
