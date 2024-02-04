@@ -70,13 +70,14 @@
 </svelte:head>
 
 <header class="bg-gray-700 py-2 mb-3 text-white shadow flex items-center justify-between">
-	<div class="w-6 h-6 ml-6 opacity-0" />
-	<h1 class="text-center text-xl font-bold">「北海道のかたち」を描いてください</h1>
-	<div class="mr-6 flex gap-4">
+	<div class="w-6 h-6 ml-6">
 		<button
 			class="i-icon-park-solid-clear-format w-5 h-5 hover:opacity-75"
 			on:click={canvasComponent.clear}
 		/>
+	</div>
+	<h1 class="text-center text-xl font-bold">「北海道のかたち」を描いてください</h1>
+	<div class="mr-6 flex gap-4">
 		<button
 			class="i-material-symbols-settings w-5 h-5 hover:opacity-75"
 			on:click={() => (showSettings = !showSettings)}
