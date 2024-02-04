@@ -25,11 +25,6 @@
 		context = canvas.getContext('2d');
 		if (!context) return;
 
-		let scale = window.devicePixelRatio;
-		canvas.width = Math.floor(canvasWidth * scale);
-		canvas.height = Math.floor(canvasHeight * scale);
-		if (context) context.scale(scale, scale);
-
 		context.lineJoin = 'round';
 		context.lineCap = 'round';
 
@@ -44,7 +39,7 @@
 		}
 
 		function dragged({ subject, x, y }: { subject: Stroke; x: number; y: number }) {
-			subject.points.push([x / scale, y / scale, Date.now()]);
+			subject.points.push([x, y, Date.now()]);
 			strokes = strokes;
 		}
 
@@ -107,7 +102,7 @@
 </script>
 
 <div class="flex flex-col gap-4">
-	<div class="b-3 b-gray-600 rounded">
+	<div class="b-4 b-gray-600 rounded-lg">
 		<canvas width={canvasWidth} height={canvasHeight} bind:this={canvas} />
 	</div>
 </div>

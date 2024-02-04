@@ -5,16 +5,31 @@
 	import type { Stroke, Session } from '$lib';
 	import DrawingCanvas from './DrawingCanvas.svelte';
 	import Settings from './Settings.svelte';
+	import { onMount } from 'svelte';
 
 	// Settings
 	let showSettings = false;
 	let strokeWidth = 3;
 	let strokeColor = '#334155';
 
-	// Canvas
+	// Canvas - always keep the aspect ratio
+	const canvasMargin = { width: 30, height: 120 };
+	const canvasAspectRatio = 2360 / 1640; // iPad Air - 2360 x 1640
+	let canvasWidth = 2360 - canvasMargin.width;
+	let canvasHeight = canvasWidth / canvasAspectRatio;
+	const handleResize = () => {
+		if (window.innerHeight < window.innerWidth) {
+			// landscape
+			canvasHeight = Math.min(window.innerHeight, 1640) - canvasMargin.height;
+			canvasWidth = canvasHeight * canvasAspectRatio;
+		} else {
+			// portrait
+			canvasWidth = Math.min(window.innerWidth, 2360) - canvasMargin.width;
+			canvasHeight = canvasWidth / canvasAspectRatio;
+		}
+	};
+
 	let canvasComponent: DrawingCanvas;
-	let canvasWidth = 500;
-	let canvasHeight = canvasWidth / 1.618;
 
 	// Drawing
 	let strokes: Stroke[] = [];
@@ -40,6 +55,14 @@
 		// Set opacity, change them accordingly
 		// draw all
 	}
+
+	onMount(() => {
+		window.addEventListener('resize', handleResize);
+		handleResize();
+		return () => {
+			window.removeEventListener('resize', handleResize);
+		};
+	});
 </script>
 
 <svelte:head>
