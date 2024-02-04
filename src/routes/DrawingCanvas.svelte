@@ -1,27 +1,25 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import * as d3 from 'd3';
+	import { onMount } from 'svelte';
+	import type { StrokeItem } from '$lib';
 
 	export let canvasWidth: number;
 	export let canvasHeight: number;
 	export let strokeWidth: number;
 	export let strokeColor: string;
 
-	type Session = {
-		strokes: StrokeItem[];
-		timestamp: number;
-	};
-	let sessions: Session[] = [];
-
-	type StrokeItem = {
-		points: [number, number][];
-		style: string;
-		width: number;
-	};
-	let strokes: StrokeItem[] = [];
+	export let strokes: StrokeItem[];
 
 	let canvas: HTMLCanvasElement;
 	let context: CanvasRenderingContext2D | null;
+
+	export function hasCanvas() {
+		return !!canvas;
+	}
+	export function setCanvasGlobalAlpha(alpha: number) {
+		if (!context) return;
+		context.globalAlpha = alpha;
+	}
 
 	onMount(() => {
 		context = canvas.getContext('2d');
@@ -46,11 +44,12 @@
 		}
 
 		function dragged({ subject, x, y }: { subject: StrokeItem; x: number; y: number }) {
-			subject.points.push([x / scale, y / scale]);
+			subject.points.push([x / scale, y / scale, Date.now()]);
 			strokes = strokes;
 		}
 
 		d3.select(context.canvas).call(
+			// @ts-ignore
 			d3
 				.drag()
 				.container(context.canvas)
@@ -60,95 +59,40 @@
 		);
 	});
 
-	function render() {
+	export function addStrokes(session: StrokeItem[]) {
+		strokes = [...strokes, ...session];
+		render();
+	}
+
+	export function render() {
 		if (!context) return;
-
 		const curve = d3.curveBasis(context);
-
 		context.clearRect(0, 0, canvasWidth, canvasHeight);
+
 		for (const stroke of strokes) {
 			context.strokeStyle = stroke.style;
 			context.lineWidth = stroke.width;
 			context.beginPath();
 			curve.lineStart();
 			for (const point of stroke.points) {
-				curve.point(...point);
+				curve.point(point[0], point[1]);
 			}
-			if (stroke.points.length === 1) curve.point(...stroke.points[0]);
+			if (stroke.points.length === 1) curve.point(stroke.points[0][0], stroke.points[0][1]);
 			curve.lineEnd();
 			context.stroke();
 		}
 		context.canvas.dispatchEvent(new CustomEvent('input'));
 	}
 
-	const clearCanvas = () => {
+	export function clear() {
 		if (!context) return;
 		strokes = [];
 		context.clearRect(0, 0, canvasWidth, canvasHeight);
-	};
-
-	const saveSession = () => {
-		sessions = [
-			...sessions,
-			{
-				strokes: strokes,
-				timestamp: Date.now()
-			}
-		];
-		clearCanvas();
-	};
-
-	const showSession = (session: Session) => {
-		strokes = session.strokes;
-		render();
-	};
-
-	const showAllSessions = () => {
-		strokes = sessions.flatMap((session) => session.strokes);
-		if (!context) return;
-		context.globalAlpha = 0.5;
-		render();
-		context.globalAlpha = 1;
-	};
+	}
 </script>
 
 <div class="flex flex-col gap-4">
 	<div class="b-3 b-gray-600 rounded">
 		<canvas width={canvasWidth} height={canvasHeight} bind:this={canvas} />
 	</div>
-
-	<div class="mt-3 flex justify-center items-center gap-12">
-		<button
-			class="w-24 p-2 bg-gray-700 text-white rounded-full flex justify-center items-center hover:opacity-75"
-			on:click={clearCanvas}>全消去</button
-		>
-		<button
-			class="w-24 p-2 bg-gray-700 text-white rounded-full flex justify-center items-center hover:opacity-75"
-			on:click={saveSession}>保存</button
-		>
-	</div>
-
-	<div class="flex justify-center items-center my-6" class:opacity-30={sessions.length == 0}>
-		<button
-			class="w-64 p-2 bg-gray-700 text-white rounded-full flex justify-center items-center hover:opacity-75"
-			on:click={showAllSessions}>全セッションを重ねて表示</button
-		>
-	</div>
-
-	<div class="flex flex-wrap gap-3 max-w-3xl">
-		{#each sessions as session}
-			<button
-				class="bg-gray-700 text-white text-sm px-2 py-1 rounded"
-				on:click={showSession(session)}
-			>
-				{new Date(session.timestamp).toLocaleString()}
-			</button>
-		{/each}
-	</div>
 </div>
-
-<style>
-	ul {
-		list-style: disc;
-	}
-</style>
