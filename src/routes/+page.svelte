@@ -4,6 +4,7 @@
 	import '../app.css';
 	import type { Stroke, Session } from '$lib';
 	import DrawingCanvas from './DrawingCanvas.svelte';
+	import SessionList from './SessionList.svelte';
 	import Settings from './Settings.svelte';
 	import { onMount } from 'svelte';
 
@@ -32,6 +33,7 @@
 	let canvasComponent: DrawingCanvas;
 
 	// Drawing
+	let showSessionList = true;
 	let strokes: Stroke[] = [];
 	let sessions: Session[] = [];
 	let startTime: number = Date.now();
@@ -70,14 +72,18 @@
 </svelte:head>
 
 <header class="bg-gray-700 py-2 mb-3 text-white shadow flex items-center justify-between">
-	<div class="w-6 h-6 ml-6">
+	<div class="ml-6">
 		<button
 			class="i-icon-park-solid-clear-format w-5 h-5 hover:opacity-75"
 			on:click={canvasComponent.clear}
 		/>
 	</div>
 	<h1 class="text-center text-xl font-bold">「北海道のかたち」を描いてください</h1>
-	<div class="mr-6 flex gap-4">
+	<div class="mr-6 flex gap-4 items-center">
+		<button
+			class="i-material-symbols-list-alt w-6 h-6 hover:opacity-75"
+			on:click={() => (showSessionList = !showSessionList)}
+		/>
 		<button
 			class="i-material-symbols-settings w-5 h-5 hover:opacity-75"
 			on:click={() => (showSettings = !showSettings)}
@@ -85,6 +91,7 @@
 	</div>
 </header>
 
+<SessionList bind:showSessionList bind:sessions />
 <Settings bind:showSettings bind:strokeWidth bind:strokeColor />
 
 <main class="flex flex-col gap-1 justify-center items-center">
@@ -103,14 +110,4 @@
 	>
 		save
 	</button>
-	<div>
-		{sessions.length} sessions
-	</div>
-	<div class="flex gap-3">
-		{#each sessions as session, i}
-			<button class="bg-gray-700 text-white py-1 px-4 rounded-full shadow hover:opacity-75">
-				{i}
-			</button>
-		{/each}
-	</div>
 </main>
