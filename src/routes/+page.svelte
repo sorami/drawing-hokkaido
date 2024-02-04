@@ -14,7 +14,7 @@
 </script>
 
 <svelte:head>
-	<title>Drawing Hokkaido</title>
+	<title>りんかくをかさねる - ななめせんなめせん</title>
 </svelte:head>
 
 <header class="bg-gray-700 py-2 mb-3 text-white shadow">
