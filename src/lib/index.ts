@@ -1,7 +1,13 @@
-type StrokeItem = {
+type Stroke = {
 	points: [number, number, number][];
 	style: string;
 	width: number;
 };
 
-export type { StrokeItem };
+type Session = {
+	strokes: Stroke[];
+	startTime: number;
+	endTime: number;
+};
+
+export type { Stroke, Session };

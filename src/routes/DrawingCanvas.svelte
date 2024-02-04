@@ -1,14 +1,14 @@
 <script lang="ts">
 	import * as d3 from 'd3';
 	import { onMount } from 'svelte';
-	import type { StrokeItem } from '$lib';
+	import type { Stroke } from '$lib';
 
 	export let canvasWidth: number;
 	export let canvasHeight: number;
 	export let strokeWidth: number;
 	export let strokeColor: string;
 
-	export let strokes: StrokeItem[];
+	export let strokes: Stroke[];
 
 	let canvas: HTMLCanvasElement;
 	let context: CanvasRenderingContext2D | null;
@@ -34,16 +34,16 @@
 		context.lineCap = 'round';
 
 		function dragsubject() {
-			const currentStroke: StrokeItem = {
+			const currStroke: Stroke = {
 				points: [],
 				style: strokeColor,
 				width: strokeWidth
 			};
-			strokes = [...strokes, currentStroke];
-			return currentStroke;
+			strokes = [...strokes, currStroke];
+			return currStroke;
 		}
 
-		function dragged({ subject, x, y }: { subject: StrokeItem; x: number; y: number }) {
+		function dragged({ subject, x, y }: { subject: Stroke; x: number; y: number }) {
 			subject.points.push([x / scale, y / scale, Date.now()]);
 			strokes = strokes;
 		}
@@ -59,15 +59,30 @@
 		);
 	});
 
-	export function addStrokes(session: StrokeItem[]) {
-		strokes = [...strokes, ...session];
-		render();
+	export function drawSession(session: Stroke[]) {
+		if (!context) return;
+		const curve = d3.curveBasis(context);
+
+		for (const stroke of session) {
+			context.strokeStyle = stroke.style;
+			context.lineWidth = stroke.width;
+			context.beginPath();
+			curve.lineStart();
+			for (const point of stroke.points) {
+				curve.point(point[0], point[1]);
+			}
+			if (stroke.points.length === 1) curve.point(stroke.points[0][0], stroke.points[0][1]);
+			curve.lineEnd();
+			context.stroke();
+		}
+		context.canvas.dispatchEvent(new CustomEvent('input'));
 	}
 
 	export function render() {
 		if (!context) return;
-		const curve = d3.curveBasis(context);
 		context.clearRect(0, 0, canvasWidth, canvasHeight);
+
+		const curve = d3.curveBasis(context);
 
 		for (const stroke of strokes) {
 			context.strokeStyle = stroke.style;

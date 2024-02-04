@@ -2,7 +2,7 @@
 	import '@unocss/reset/tailwind-compat.css';
 	import 'virtual:uno.css';
 	import '../app.css';
-	import type { StrokeItem } from '$lib';
+	import type { Stroke, Session } from '$lib';
 	import DrawingCanvas from './DrawingCanvas.svelte';
 	import Settings from './Settings.svelte';
 
@@ -17,11 +17,28 @@
 	let canvasHeight = canvasWidth / 1.618;
 
 	// Drawing
-	let strokes: StrokeItem[] = [];
-	let sessions: StrokeItem[][] = [];
+	let strokes: Stroke[] = [];
+	let sessions: Session[] = [];
+	let startTime: number = Date.now();
 
-	function showSession(session: StrokeItem[]) {
-		canvasComponent.addStrokes(session);
+	function saveSession() {
+		sessions = [
+			...sessions,
+			{
+				strokes: strokes,
+				startTime,
+				endTime: Date.now()
+			}
+		];
+		strokes = [];
+		canvasComponent.clear();
+	}
+
+	function replay() {
+		// TODO:
+		// select N strokes
+		// Set opacity, change them accordingly
+		// draw all
 	}
 </script>
 
@@ -58,20 +75,16 @@
 
 	<button
 		class="bg-gray-700 text-white py-2 px-4 rounded shadow hover:opacity-75"
-		on:click={() => {
-			sessions = [...sessions, strokes];
-			canvasComponent.clear();
-		}}
+		on:click={() => saveSession()}
 	>
 		save
 	</button>
-	<div>{sessions.length} session(s)</div>
+	<div>
+		{sessions.length} sessions
+	</div>
 	<div class="flex gap-3">
 		{#each sessions as session, i}
-			<button
-				class="bg-gray-700 text-white py-1 px-4 rounded-full shadow hover:opacity-75"
-				on:click={() => showSession(session)}
-			>
+			<button class="bg-gray-700 text-white py-1 px-4 rounded-full shadow hover:opacity-75">
 				{i}
 			</button>
 		{/each}
