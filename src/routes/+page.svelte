@@ -13,7 +13,7 @@
 	let strokeColor = '#334155';
 
 	// Canvas - always keep the aspect ratio
-	const canvasMargin = { width: 30, height: 120 };
+	const canvasMargin = { width: 30, height: 80 };
 	const canvasAspectRatio = 2360 / 1640; // iPad Air - 2360 x 1640
 	let canvasWidth = 2360 - canvasMargin.width;
 	let canvasHeight = canvasWidth / canvasAspectRatio;
