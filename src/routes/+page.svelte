@@ -10,10 +10,11 @@
 
 	// Settings
 	let showSettings = false;
-	let strokeWidth = 3;
+	let strokeWidth = 8;
 	let strokeColor = '#334155';
 
 	// Canvas - always keep the aspect ratio
+	let canvasComponent: DrawingCanvas;
 	const canvasMargin = { width: 30, height: 80 };
 	const canvasAspectRatio = 2360 / 1640; // iPad Air - 2360 x 1640
 	let canvasWidth = 2360 / 2 - canvasMargin.width;
@@ -30,10 +31,16 @@
 		}
 	};
 
-	let canvasComponent: DrawingCanvas;
+	// Mode
+	let isDrawingMode = false;
+	let countdownTime = 30;
+	$: {
+		isDrawingMode;
+		startTime = Date.now();
+	}
 
 	// Drawing
-	let showSessionList = true;
+	let showSessionList = false;
 	let strokes: Stroke[] = [];
 	let sessions: Session[] = [];
 	let startTime: number = Date.now();
@@ -104,10 +111,10 @@
 		bind:strokes
 	/>
 
-	<button
+	<!-- <button
 		class="bg-gray-700 text-white py-2 px-4 rounded shadow hover:opacity-75"
 		on:click={() => saveSession()}
 	>
 		save
-	</button>
+	</button> -->
 </main>
