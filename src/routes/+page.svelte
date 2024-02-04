@@ -41,7 +41,7 @@
 	}
 
 	// Drawing
-	let showSessionList = false;
+	let showSessionList = true;
 	let strokes: Stroke[] = [];
 	let sessions: Session[] = [];
 	let startTime: number = Date.now();
@@ -67,12 +67,20 @@
 		}, 0);
 	}
 
-	let sessionTimestamp = '';
+	let replayCaption = '';
 	function showSession(session: Session) {
 		mode = 'replay';
-		sessionTimestamp = new Date(session.endTime).toISOString();
+		replayCaption = new Date(session.endTime).toISOString();
 		canvasComponent.clear();
-		canvasComponent.drawSession(session.strokes);
+		canvasComponent.drawStrokes(session.strokes);
+	}
+	function showAllSessions() {
+		mode = 'replay';
+		replayCaption = `${sessions.length} セッション`;
+		canvasComponent.clear();
+		for (const session of sessions) {
+			canvasComponent.drawStrokes(session.strokes, 0.5);
+		}
 	}
 
 	function replay() {
@@ -119,7 +127,7 @@
 	</div>
 </header>
 
-<SessionList bind:showSessionList bind:sessions {showSession} />
+<SessionList bind:showSessionList bind:sessions {showSession} {showAllSessions} />
 <Settings bind:showSettings bind:strokeWidth bind:strokeColor />
 
 <main class="flex flex-col gap-1 justify-center items-center">
@@ -160,7 +168,7 @@
 		{/if}
 
 		{#if mode === 'replay'}
-			<div class="absolute top-3 left-3 text-gray-70 text-xl">{sessionTimestamp}</div>
+			<div class="absolute top-5 left-5 text-gray-700 text-xl">{replayCaption}</div>
 			<div class="absolute bottom-3 right-3">
 				<button
 					class="bg-gray-700 text-white px-6 py-2 rounded-full shadow-xl hover:opacity-75 text-xl"

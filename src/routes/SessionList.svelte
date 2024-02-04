@@ -4,6 +4,7 @@
 	export let showSessionList: boolean;
 	export let sessions: Session[];
 	export let showSession: (session: Session) => void;
+	export let showAllSessions: () => void;
 </script>
 
 {#if showSessionList}
@@ -14,6 +15,13 @@
 				class="i-material-symbols-cancel w-4 h-4 opacity-75"
 				on:click={() => (showSessionList = false)}
 			/>
+		</div>
+
+		<div class="text-center my-3">
+			<button
+				class="rounded bg-white text-gray-700 text-sm px-2 py-1"
+				on:click={() => showAllSessions()}>重ねて表示</button
+			>
 		</div>
 
 		<div class="mt-3">

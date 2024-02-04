@@ -2,6 +2,7 @@
 	import * as d3 from 'd3';
 	import { onMount } from 'svelte';
 	import type { Stroke } from '$lib/types';
+	import { randomHexColor } from '$lib/utils';
 
 	export let canvasWidth: number;
 	export let canvasHeight: number;
@@ -54,31 +55,14 @@
 		);
 	});
 
-	export function drawSession(session: Stroke[]) {
+	export function drawStrokes(thisStrokes: Stroke[], globalAlpha = 1) {
 		if (!context) return;
 		const curve = d3.curveBasis(context);
 
-		for (const stroke of session) {
-			context.strokeStyle = stroke.style;
-			context.lineWidth = stroke.width;
-			context.beginPath();
-			curve.lineStart();
-			for (const point of stroke.points) {
-				curve.point(point[0], point[1]);
-			}
-			if (stroke.points.length === 1) curve.point(stroke.points[0][0], stroke.points[0][1]);
-			curve.lineEnd();
-			context.stroke();
-		}
-		context.canvas.dispatchEvent(new CustomEvent('input'));
-	}
-
-	export function renderStrokes(thisStrokes: Stroke[]) {
-		if (!context) return;
-		const curve = d3.curveBasis(context);
+		context.globalAlpha = globalAlpha;
 
 		for (const stroke of thisStrokes) {
-			context.strokeStyle = stroke.style;
+			context.strokeStyle = randomHexColor(); //stroke.style;
 			context.lineWidth = stroke.width;
 			context.beginPath();
 			curve.lineStart();
@@ -89,6 +73,9 @@
 			curve.lineEnd();
 			context.stroke();
 		}
+
+		context.globalAlpha = 1;
+
 		context.canvas.dispatchEvent(new CustomEvent('input'));
 	}
 
