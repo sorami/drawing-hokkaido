@@ -33,7 +33,7 @@
 
 	// Mode
 	let isDrawingMode = false;
-	let countdownTime = 30;
+	let drawingTimer = 30;
 	$: {
 		isDrawingMode;
 		startTime = Date.now();
@@ -85,7 +85,11 @@
 			on:click={canvasComponent.clear}
 		/>
 	</div>
-	<h1 class="text-center text-xl font-bold">「北海道のかたち」を描いてください</h1>
+
+	<div class="flex items-center gap-3">
+		<h1 class="text-center text-xl font-bold">「北海道のかたち」を描いてください</h1>
+	</div>
+
 	<div class="mr-6 flex gap-4 items-center">
 		<button
 			class="i-material-symbols-list-alt w-6 h-6 hover:opacity-75"
@@ -102,19 +106,34 @@
 <Settings bind:showSettings bind:strokeWidth bind:strokeColor />
 
 <main class="flex flex-col gap-1 justify-center items-center">
-	<DrawingCanvas
-		bind:this={canvasComponent}
-		{canvasWidth}
-		{canvasHeight}
-		{strokeWidth}
-		{strokeColor}
-		bind:strokes
-	/>
+	{#if !isDrawingMode}
+		<div class="absolute z-10">
+			<button
+				class="bg-gray-700 text-white p-6 rounded-full shadow-xl hover:opacity-75 text-5xl"
+				on:click={() => (isDrawingMode = true)}>はじめる</button
+			>
+		</div>
+	{/if}
 
-	<!-- <button
-		class="bg-gray-700 text-white py-2 px-4 rounded shadow hover:opacity-75"
-		on:click={() => saveSession()}
-	>
-		save
-	</button> -->
+	<div class={isDrawingMode ? 'relative' : 'relative pointer-events-none bg-gray-400 rounded-lg'}>
+		<DrawingCanvas
+			bind:this={canvasComponent}
+			{canvasWidth}
+			{canvasHeight}
+			{strokeWidth}
+			{strokeColor}
+			bind:strokes
+		/>
+
+		{#if isDrawingMode}
+			<div class="absolute bottom-3 right-3">
+				<button
+					class="bg-gray-700 text-white px-6 py-1 rounded-full shadow-xl hover:opacity-75 text-xl"
+					on:click={() => saveSession()}
+				>
+					おわる
+				</button>
+			</div>
+		{/if}
+	</div>
 </main>
