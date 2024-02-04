@@ -41,7 +41,7 @@
 	}
 
 	// Drawing
-	let showSessionList = true;
+	let showSessionList = false;
 	let strokes: Stroke[] = [];
 	let sessions: Session[] = [];
 	let startTime: number = Date.now();
