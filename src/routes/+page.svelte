@@ -2,8 +2,8 @@
 	import '@unocss/reset/tailwind-compat.css';
 	import 'virtual:uno.css';
 	import '../app.css';
-	import type { Stroke, Session } from '$lib';
-	import { doConfetti } from '$lib';
+	import type { Stroke, Session } from '$lib/types';
+	import { doConfetti } from '$lib/utils';
 	import DrawingCanvas from './DrawingCanvas.svelte';
 	import SessionList from './SessionList.svelte';
 	import Settings from './Settings.svelte';

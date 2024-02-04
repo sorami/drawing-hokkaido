@@ -1,7 +1,7 @@
 <script lang="ts">
 	import * as d3 from 'd3';
 	import { onMount } from 'svelte';
-	import type { Stroke } from '$lib';
+	import type { Stroke } from '$lib/types';
 
 	export let canvasWidth: number;
 	export let canvasHeight: number;

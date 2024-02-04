@@ -1,21 +1,9 @@
 import confetti from 'canvas-confetti';
 
-type Stroke = {
-	points: [number, number, number][];
-	style: string;
-	width: number;
-};
-
-type Session = {
-	strokes: Stroke[];
-	startTime: number;
-	endTime: number;
-};
-
-function doConfetti(x: number, y: number) {
+function doConfetti(x: number, y: number, angle = 120) {
 	const confettiCount = 500;
 	const confettiDefaults = {
-		angle: 120,
+		angle,
 		origin: { x, y }
 	};
 	function fire(particleRatio: number, opts: any) {
@@ -49,5 +37,4 @@ function doConfetti(x: number, y: number) {
 	});
 }
 
-export type { Stroke, Session };
 export { doConfetti };

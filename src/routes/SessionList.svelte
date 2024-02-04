@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Session } from '$lib';
+	import type { Session } from '$lib/types';
 
 	export let showSessionList: boolean;
 	export let sessions: Session[];
