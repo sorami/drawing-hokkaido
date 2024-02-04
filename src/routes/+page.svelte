@@ -3,6 +3,7 @@
 	import 'virtual:uno.css';
 	import '../app.css';
 	import type { Stroke, Session } from '$lib';
+	import { doConfetti } from '$lib';
 	import DrawingCanvas from './DrawingCanvas.svelte';
 	import SessionList from './SessionList.svelte';
 	import Settings from './Settings.svelte';
@@ -56,6 +57,14 @@
 		];
 		strokes = [];
 		canvasComponent.clear();
+	}
+
+	function finishDrawing(event: MouseEvent) {
+		doConfetti(event.clientX / window.innerWidth, event.clientY / window.innerHeight);
+		setTimeout(() => {
+			saveSession();
+			isDrawingMode = false;
+		}, 1000);
 	}
 
 	function replay() {
@@ -129,12 +138,9 @@
 			<div class="absolute bottom-3 right-3">
 				<button
 					class="bg-gray-700 text-white px-6 py-2 rounded-full shadow-xl hover:opacity-75 text-xl"
-					on:click={() => {
-						saveSession();
-						isDrawingMode = false;
-					}}
+					on:click={finishDrawing}
 				>
-					終わる ✅
+					終わる 🚀
 				</button>
 			</div>
 		{/if}
