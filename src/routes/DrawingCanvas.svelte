@@ -128,8 +128,6 @@
 		>
 	</div>
 
-	<hr class="my-6" />
-
 	<div class="flex justify-center items-center my-6" class:opacity-30={sessions.length == 0}>
 		<button
 			class="w-64 p-2 bg-gray-700 text-white rounded-full flex justify-center items-center hover:opacity-75"

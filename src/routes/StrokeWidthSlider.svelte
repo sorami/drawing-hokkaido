@@ -4,7 +4,7 @@
 	const MAX_WIDTH = 20;
 </script>
 
-<div class="flex gap-x-3 items-center text-neutral-600 text-xl">
+<div class="flex gap-x-3 items-center text-xl">
 	<div class="i-heroicons-paint-brush-16-solid" />
 	<input
 		type="range"
@@ -14,7 +14,7 @@
 		min={MIN_WIDTH}
 		max={MAX_WIDTH}
 		step="1"
-		class="w-52 accent-neutral-5 focus:accent-neutral-8"
+		class="w-52"
 	/>
 	<div class="w-3">
 		{strokeWidth}
