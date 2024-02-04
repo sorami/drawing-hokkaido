@@ -109,7 +109,7 @@
 	{#if !isDrawingMode}
 		<div class="absolute z-10">
 			<button
-				class="bg-gray-700 text-white p-6 rounded-full shadow-xl hover:opacity-75 text-5xl"
+				class="bg-gray-700 text-white px-8 py-6 rounded-full shadow-xl hover:opacity-75 text-5xl"
 				on:click={() => (isDrawingMode = true)}>はじめる</button
 			>
 		</div>
@@ -128,10 +128,13 @@
 		{#if isDrawingMode}
 			<div class="absolute bottom-3 right-3">
 				<button
-					class="bg-gray-700 text-white px-6 py-1 rounded-full shadow-xl hover:opacity-75 text-xl"
-					on:click={() => saveSession()}
+					class="bg-gray-700 text-white px-6 py-2 rounded-full shadow-xl hover:opacity-75 text-xl"
+					on:click={() => {
+						saveSession();
+						isDrawingMode = false;
+					}}
 				>
-					おわる
+					終わる ✅
 				</button>
 			</div>
 		{/if}
