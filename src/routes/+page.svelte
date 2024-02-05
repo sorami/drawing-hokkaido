@@ -9,7 +9,7 @@
 	import Settings from './Settings.svelte';
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
-	import { sineIn, sineOut } from 'svelte/easing';
+	import { sineIn } from 'svelte/easing';
 
 	function randomRange(min: number, max: number) {
 		return Math.random() * (max - min) + min;
