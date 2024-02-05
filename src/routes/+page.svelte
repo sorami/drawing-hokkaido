@@ -33,7 +33,7 @@
 	};
 
 	// Mode
-	let mode: 'init' | 'draw' | 'replay' = 'init';
+	let mode: 'init' | 'draw' | 'log' | 'replay' = 'init';
 	let drawingTimer = 30;
 	$: {
 		mode;
@@ -69,13 +69,13 @@
 
 	let replayCaption = '';
 	function showSession(session: Session) {
-		mode = 'replay';
+		mode = 'log';
 		replayCaption = new Date(session.endTime).toISOString();
 		canvasComponent.clear();
 		canvasComponent.drawStrokes(session.strokes);
 	}
 	function showAllSessions() {
-		mode = 'replay';
+		mode = 'log';
 		replayCaption = `${sessions.length} セッション`;
 		canvasComponent.clear();
 		for (const session of sessions) {
@@ -83,11 +83,34 @@
 		}
 	}
 
-	function replay() {
-		// TODO:
-		// select N strokes
-		// Set opacity, change them accordingly
-		// draw all
+	function replay(session: Session = sessions[sessions.length - 1]) {
+		mode = 'replay';
+		replayCaption = new Date(startTime).toISOString();
+		canvasComponent.clear();
+
+		// const tStart = Date.now();
+		// const tElapsed = 0;
+
+		// let strokeIdx = 0;
+		// let pointIdx = 0;
+		// let intervalId: number;
+		// // intervalId = setInterval(() => {
+		// // 	if (strokeIdx >= strokes.length) {
+		// // 		clearInterval(intervalId);
+		// // 		mode = 'init';
+		// // 		return;
+		// // 	}
+		// // 	const stroke = strokes[strokeIdx];
+
+		// // 	if (pointIdx >= stroke.points.length) {
+		// // 		strokeIdx++;
+		// // 		pointIdx = 0;
+		// // 		return;
+		// // 	}
+
+		// // 	canvasComponent.drawStroke(stroke, pointIdx, 0.5);
+		// // 	pointIdx++;
+		// // }, 500);
 	}
 
 	onMount(() => {
@@ -115,7 +138,8 @@
 		<h1 class="text-center text-xl font-bold">「北海道のかたち」を描いてください</h1>
 	</div>
 
-	<div class="mr-6 flex gap-4 items-center">
+	<div class="mr-6 flex gap-6 items-center">
+		<button class="i-material-symbols-replay w-6 h-6 hover:opacity-75" on:click={() => replay()} />
 		<button
 			class="i-material-symbols-list-alt w-6 h-6 hover:opacity-75"
 			on:click={() => (showSessionList = !showSessionList)}
@@ -143,7 +167,7 @@
 	<div
 		class="relative rounded-lg"
 		class:bg-gray-400={mode === 'init'}
-		class:bg-gray-300={mode === 'replay'}
+		class:bg-gray-300={mode === 'log' || mode === 'replay'}
 	>
 		<div class={mode === 'draw' ? '' : 'pointer-events-none'}>
 			<DrawingCanvas
@@ -167,7 +191,7 @@
 			</div>
 		{/if}
 
-		{#if mode === 'replay'}
+		{#if mode === 'log' || mode === 'replay'}
 			<div class="absolute top-5 left-5 text-gray-700 text-xl">{replayCaption}</div>
 			<div class="absolute bottom-3 right-3">
 				<button
