@@ -3,7 +3,6 @@
 	import { onMount } from 'svelte';
 	import type { Stroke } from '$lib/types';
 	import { randomHexColor } from '$lib/utils';
-	import { fade } from 'svelte/transition';
 
 	export let canvasWidth: number;
 	export let canvasHeight: number;
