@@ -8,6 +8,16 @@
 	import SessionList from './SessionList.svelte';
 	import Settings from './Settings.svelte';
 	import { onMount } from 'svelte';
+	import { fade } from 'svelte/transition';
+	import { sineIn, sineOut } from 'svelte/easing';
+
+	function randomRange(min: number, max: number) {
+		return Math.random() * (max - min) + min;
+	}
+
+	const REPLAY_ADD_INTERVAL = 1000;
+	const replayFadeInDuration = () => randomRange(1000, 4000);
+	const replayFadeOutDuration = () => randomRange(1000, 2000);
 
 	// Settings
 	let showSettings = false;
@@ -34,7 +44,6 @@
 
 	// Mode
 	let mode: 'init' | 'draw' | 'log' | 'replay' = 'init';
-	let drawingTimer = 30;
 	$: {
 		mode;
 		startTime = Date.now();
@@ -46,13 +55,16 @@
 	let sessions: Session[] = [];
 	let startTime: number = Date.now();
 
-	function saveSession() {
+	async function saveSession() {
+		const blob = await canvasComponent.toBlob();
 		sessions = [
 			...sessions,
 			{
 				strokes: strokes,
 				tStart: startTime,
-				tEnd: Date.now()
+				tEnd: Date.now(),
+				blob,
+				blobUrl: URL.createObjectURL(blob)
 			}
 		];
 		strokes = [];
@@ -83,60 +95,43 @@
 		}
 	}
 
-	// todo: fn arg `session`
-	function replay(session: Session = sessions[sessions.length - 1]) {
+	type ReplayItem = { key: string; src: string };
+	let replayItems: ReplayItem[] = [];
+	let fadingOutItemKeys = new Set<string>();
+	function replay() {
 		mode = 'replay';
-		replayCaption = new Date(session.tStart).toISOString();
 		canvasComponent.clear();
+		if (sessions.length === 0) return;
+		replayItems = [];
 
-		let intervalId: number;
-		const REPLAY_RENDER_INTERVAL = 500;
+		const candidates: ReplayItem[] = sessions.map((session, i) => ({
+			key: i.toString(),
+			src: session.blobUrl
+		}));
 
-		const tStart = Date.now(); // for elapsed time
-		let tCurr = session.tStart; // relative to session.startTime and session.endTime
+		function selectRandom() {
+			// filter out items that are already in current replayItems
+			let remainingCandidates = candidates.filter(
+				(cand) => !replayItems.some((replayItem) => replayItem.key === cand.key)
+			);
 
-		let strokesWithTEnd = session.strokes.map((st) => {
-			if (st.points.length === 0) return { ...st, tEndStroke: null };
-			const tEndStroke = st.points[st.points.length - 1][2];
-			return { ...st, tEndStroke };
-		});
+			// filter out items that are in fading out state
+			remainingCandidates = remainingCandidates.filter((cand) => !fadingOutItemKeys.has(cand.key));
 
-		let tick = 0;
+			if (remainingCandidates.length === 0) return null;
 
-		intervalId = setInterval(() => {
-			// check time
-			const tElapsed = Date.now() - tStart;
-			tCurr += tElapsed;
-			if (session.tEnd <= tCurr) {
-				clearInterval(intervalId);
-				canvasComponent.clear();
-				canvasComponent.drawStrokes(session.strokes, 0.8);
-				replayCaption = '再生終了';
-				return;
-			}
+			// select a random item
+			const randomIndex = Math.floor(Math.random() * remainingCandidates.length);
+			return remainingCandidates[randomIndex];
+		}
 
-			// filter strokes according to currTime
-			let currStrokes = strokesWithTEnd.filter((st) => {
-				if (!st.tEndStroke) return;
-				return st.tEndStroke <= tCurr;
-			});
-			if (currStrokes.length === 0) return;
-
-			// filter last stroke's points according to currTime
-			currStrokes[currStrokes.length - 1].points = currStrokes[
-				currStrokes.length - 1
-			].points.filter((pt) => {
-				return pt[2] <= tCurr;
-			});
-
-			// draw current strokes
-			canvasComponent.clear();
-			canvasComponent.drawStrokes(currStrokes, 0.8);
-
-			tick += 1;
-			const nPoints = currStrokes.reduce((acc, st) => acc + st.points.length, 0);
-			replayCaption = `tick: ${tick} \t ${nPoints} points`;
-		}, REPLAY_RENDER_INTERVAL);
+		// add a random item
+		let intervalId1: number;
+		intervalId1 = setInterval(() => {
+			const randomItem = selectRandom();
+			if (randomItem) replayItems = [...replayItems, randomItem];
+			if (mode !== 'replay') clearInterval(intervalId1);
+		}, REPLAY_ADD_INTERVAL);
 	}
 
 	onMount(() => {
@@ -153,10 +148,17 @@
 </svelte:head>
 
 <header class="bg-gray-700 py-2 mb-3 text-white shadow flex items-center justify-between">
-	<div class="ml-6">
+	<div class="ml-6 flex gap-6 items-center">
 		<button
 			class="i-icon-park-solid-clear-format w-5 h-5 hover:opacity-75"
 			on:click={canvasComponent.clear}
+		/>
+		<button
+			class="i-material-symbols-home w-5 h-5 hover:opacity-75"
+			on:click={() => {
+				canvasComponent.clear();
+				mode = 'init';
+			}}
 		/>
 	</div>
 
@@ -193,18 +195,46 @@
 	<div
 		class="relative rounded-lg"
 		class:bg-gray-400={mode === 'init'}
-		class:bg-gray-300={mode === 'log' || mode === 'replay'}
+		class:bg-gray-300={mode === 'log'}
 	>
 		<div class={mode === 'draw' ? '' : 'pointer-events-none'}>
-			<DrawingCanvas
-				bind:this={canvasComponent}
-				{canvasWidth}
-				{canvasHeight}
-				{strokeWidth}
-				{strokeColor}
-				bind:strokes
-			/>
+			<div>
+				<DrawingCanvas
+					bind:this={canvasComponent}
+					{canvasWidth}
+					{canvasHeight}
+					{strokeWidth}
+					{strokeColor}
+					bind:strokes
+				/>
+			</div>
 		</div>
+
+		{#if mode == 'replay'}
+			<div class="absolute top-0 left-0 w-full h-full">
+				<div id="image-container" class="relative">
+					{#each replayItems as replayItem (replayItem.key)}
+						<div
+							class="absolute top-0 left-0"
+							in:fade={{ duration: replayFadeInDuration(), easing: sineIn }}
+							on:introend={() => {
+								// immediately remove the item
+								replayItems = replayItems.filter((d) => d.key !== replayItem.key);
+								// keep track of the items in fading out state
+								fadingOutItemKeys.add(replayItem.key);
+							}}
+							out:fade={{ duration: replayFadeOutDuration(), easing: sineIn }}
+							on:outroend={() => {
+								// fade out is done, remove the item
+								fadingOutItemKeys.delete(replayItem.key);
+							}}
+						>
+							<img alt={replayItem.key} src={replayItem.src} />
+						</div>
+					{/each}
+				</div>
+			</div>
+		{/if}
 
 		{#if mode === 'draw'}
 			<div class="absolute bottom-3 right-3">
@@ -217,7 +247,7 @@
 			</div>
 		{/if}
 
-		{#if mode === 'log' || mode === 'replay'}
+		{#if mode === 'log'}
 			<div class="absolute top-5 left-5 text-gray-700 text-xl">{replayCaption}</div>
 			<div class="absolute bottom-3 right-3">
 				<button

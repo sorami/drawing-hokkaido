@@ -73,9 +73,27 @@
 		context.clearRect(0, 0, canvasWidth, canvasHeight);
 	}
 
+	export async function toBlob(): Promise<Blob> {
+		const mimeType = 'image/png';
+		const qualityArgument = 1;
+		return new Promise((resolve, reject) => {
+			canvas.toBlob(
+				(blob) => {
+					if (blob) {
+						resolve(blob);
+					} else {
+						reject(new Error('Canvas to Blob conversion failed'));
+					}
+				},
+				mimeType,
+				qualityArgument
+			);
+		});
+	}
+
 	onMount(() => {
 		context = canvas.getContext('2d');
-		if (!context) return;
+		if (!context) return null;
 		curve = d3.curveBasis(context);
 
 		context.lineJoin = 'round';
