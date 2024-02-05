@@ -6,8 +6,8 @@ type Stroke = {
 
 type Session = {
 	strokes: Stroke[];
-	startTime: number;
-	endTime: number;
+	tStart: number;
+	tEnd: number;
 };
 
 export type { Stroke, Session };

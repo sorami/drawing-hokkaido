@@ -26,10 +26,10 @@
 
 		<div class="mt-3">
 			<ul class="text-sm">
-				{#each sessions.sort((a, b) => b.endTime - a.endTime) as session}
+				{#each sessions.sort((a, b) => b.tEnd - a.tStart) as session}
 					<li>
 						<button class="bg-gray-700 underline" on:click={() => showSession(session)}>
-							{new Date(session.endTime).toISOString()}
+							{new Date(session.tStart).toISOString()}
 						</button>
 					</li>
 				{/each}

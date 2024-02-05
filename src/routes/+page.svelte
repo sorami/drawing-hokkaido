@@ -51,8 +51,8 @@
 			...sessions,
 			{
 				strokes: strokes,
-				startTime,
-				endTime: Date.now()
+				tStart: startTime,
+				tEnd: Date.now()
 			}
 		];
 		strokes = [];
@@ -70,7 +70,7 @@
 	let replayCaption = '';
 	function showSession(session: Session) {
 		mode = 'log';
-		replayCaption = new Date(session.endTime).toISOString();
+		replayCaption = new Date(session.tStart).toISOString();
 		canvasComponent.clear();
 		canvasComponent.drawStrokes(session.strokes);
 	}
@@ -83,34 +83,60 @@
 		}
 	}
 
+	// todo: fn arg `session`
 	function replay(session: Session = sessions[sessions.length - 1]) {
 		mode = 'replay';
-		replayCaption = new Date(startTime).toISOString();
+		replayCaption = new Date(session.tStart).toISOString();
 		canvasComponent.clear();
 
-		// const tStart = Date.now();
-		// const tElapsed = 0;
+		let intervalId: number;
+		const REPLAY_RENDER_INTERVAL = 500;
 
-		// let strokeIdx = 0;
-		// let pointIdx = 0;
-		// let intervalId: number;
-		// // intervalId = setInterval(() => {
-		// // 	if (strokeIdx >= strokes.length) {
-		// // 		clearInterval(intervalId);
-		// // 		mode = 'init';
-		// // 		return;
-		// // 	}
-		// // 	const stroke = strokes[strokeIdx];
+		const tStart = Date.now(); // for elapsed time
+		let tCurr = session.tStart; // relative to session.startTime and session.endTime
 
-		// // 	if (pointIdx >= stroke.points.length) {
-		// // 		strokeIdx++;
-		// // 		pointIdx = 0;
-		// // 		return;
-		// // 	}
+		let strokesWithTEnd = session.strokes.map((st) => {
+			if (st.points.length === 0) return { ...st, tEndStroke: null };
+			const tEndStroke = st.points[st.points.length - 1][2];
+			return { ...st, tEndStroke };
+		});
 
-		// // 	canvasComponent.drawStroke(stroke, pointIdx, 0.5);
-		// // 	pointIdx++;
-		// // }, 500);
+		let tick = 0;
+
+		intervalId = setInterval(() => {
+			// check time
+			const tElapsed = Date.now() - tStart;
+			tCurr += tElapsed;
+			if (session.tEnd <= tCurr) {
+				clearInterval(intervalId);
+				canvasComponent.clear();
+				canvasComponent.drawStrokes(session.strokes, 0.8);
+				replayCaption = '再生終了';
+				return;
+			}
+
+			// filter strokes according to currTime
+			let currStrokes = strokesWithTEnd.filter((st) => {
+				if (!st.tEndStroke) return;
+				return st.tEndStroke <= tCurr;
+			});
+			if (currStrokes.length === 0) return;
+
+			// filter last stroke's points according to currTime
+			currStrokes[currStrokes.length - 1].points = currStrokes[
+				currStrokes.length - 1
+			].points.filter((pt) => {
+				return pt[2] <= tCurr;
+			});
+
+			// draw current strokes
+			canvasComponent.clear();
+			canvasComponent.drawStrokes(currStrokes, 0.8);
+
+			tick += 1;
+			const nPoints = currStrokes.reduce((acc, st) => acc + st.points.length, 0);
+			replayCaption = `tick: ${tick} \t ${nPoints} points`;
+		}, REPLAY_RENDER_INTERVAL);
 	}
 
 	onMount(() => {

@@ -3,6 +3,7 @@
 	import { onMount } from 'svelte';
 	import type { Stroke } from '$lib/types';
 	import { randomHexColor } from '$lib/utils';
+	import { fade } from 'svelte/transition';
 
 	export let canvasWidth: number;
 	export let canvasHeight: number;
@@ -13,6 +14,7 @@
 
 	let canvas: HTMLCanvasElement;
 	let context: CanvasRenderingContext2D | null;
+	let curve: d3.CurveGenerator | null;
 
 	export function hasCanvas() {
 		return !!canvas;
@@ -22,9 +24,59 @@
 		context.globalAlpha = alpha;
 	}
 
+	export function drawStrokes(thisStrokes: Stroke[], globalAlpha = 1) {
+		if (!context || !curve) return;
+
+		context.globalAlpha = globalAlpha;
+
+		for (const stroke of thisStrokes) {
+			// context.strokeStyle = randomHexColor();
+			context.strokeStyle = stroke.style;
+			context.lineWidth = stroke.width;
+			context.beginPath();
+			curve.lineStart();
+			for (const point of stroke.points) {
+				curve.point(point[0], point[1]);
+			}
+			if (stroke.points.length === 1) curve.point(stroke.points[0][0], stroke.points[0][1]);
+			curve.lineEnd();
+			context.stroke();
+		}
+
+		context.globalAlpha = 1;
+
+		context.canvas.dispatchEvent(new CustomEvent('input'));
+	}
+
+	export function render() {
+		if (!context || !curve) return;
+		context.clearRect(0, 0, canvasWidth, canvasHeight);
+
+		for (const stroke of strokes) {
+			context.strokeStyle = stroke.style;
+			context.lineWidth = stroke.width;
+			context.beginPath();
+			curve.lineStart();
+			for (const point of stroke.points) {
+				curve.point(point[0], point[1]);
+			}
+			if (stroke.points.length === 1) curve.point(stroke.points[0][0], stroke.points[0][1]);
+			curve.lineEnd();
+			context.stroke();
+		}
+		context.canvas.dispatchEvent(new CustomEvent('input'));
+	}
+
+	export function clear() {
+		if (!context) return;
+		strokes = [];
+		context.clearRect(0, 0, canvasWidth, canvasHeight);
+	}
+
 	onMount(() => {
 		context = canvas.getContext('2d');
 		if (!context) return;
+		curve = d3.curveBasis(context);
 
 		context.lineJoin = 'round';
 		context.lineCap = 'round';
@@ -54,57 +106,6 @@
 				.on('start.render drag.render', render)
 		);
 	});
-
-	export function drawStrokes(thisStrokes: Stroke[], globalAlpha = 1) {
-		if (!context) return;
-		const curve = d3.curveBasis(context);
-
-		context.globalAlpha = globalAlpha;
-
-		for (const stroke of thisStrokes) {
-			context.strokeStyle = randomHexColor(); //stroke.style;
-			context.lineWidth = stroke.width;
-			context.beginPath();
-			curve.lineStart();
-			for (const point of stroke.points) {
-				curve.point(point[0], point[1]);
-			}
-			if (stroke.points.length === 1) curve.point(stroke.points[0][0], stroke.points[0][1]);
-			curve.lineEnd();
-			context.stroke();
-		}
-
-		context.globalAlpha = 1;
-
-		context.canvas.dispatchEvent(new CustomEvent('input'));
-	}
-
-	export function render() {
-		if (!context) return;
-		context.clearRect(0, 0, canvasWidth, canvasHeight);
-
-		const curve = d3.curveBasis(context);
-
-		for (const stroke of strokes) {
-			context.strokeStyle = stroke.style;
-			context.lineWidth = stroke.width;
-			context.beginPath();
-			curve.lineStart();
-			for (const point of stroke.points) {
-				curve.point(point[0], point[1]);
-			}
-			if (stroke.points.length === 1) curve.point(stroke.points[0][0], stroke.points[0][1]);
-			curve.lineEnd();
-			context.stroke();
-		}
-		context.canvas.dispatchEvent(new CustomEvent('input'));
-	}
-
-	export function clear() {
-		if (!context) return;
-		strokes = [];
-		context.clearRect(0, 0, canvasWidth, canvasHeight);
-	}
 </script>
 
 <div class="flex flex-col gap-4">
