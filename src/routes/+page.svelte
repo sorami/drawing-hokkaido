@@ -14,7 +14,7 @@
 	import { initializeApp } from 'firebase/app';
 	import { getFirestore } from 'firebase/firestore';
 	import { firebaseConfig } from '$lib/firebase';
-	import { collection, addDoc, Bytes } from 'firebase/firestore';
+	import { collection, addDoc, Bytes, getDocs } from 'firebase/firestore';
 
 	// firebase setup
 	const app = initializeApp(firebaseConfig);
@@ -156,9 +156,31 @@
 		}, REPLAY_ADD_INTERVAL);
 	}
 
+	async function loadData() {
+		const loadedSession: Session[] = [];
+		const querySnapshot = await getDocs(collection(db, 'sessions'));
+		querySnapshot.forEach((doc) => {
+			const data = doc.data();
+			const blob = new Blob([data.img.toUint8Array().buffer], { type: 'image/png' });
+			const blobUrl = URL.createObjectURL(blob);
+			loadedSession.push({
+				strokes: data.strokes,
+				time: { startedAt: data.time.startedAt.toDate(), endedAt: data.time.endedAt.toDate() },
+				canvasSize: data.canvasSize,
+				blob,
+				blobUrl
+			});
+		});
+		console.log('loadedSession', loadedSession);
+		sessions = loadedSession;
+	}
+
 	onMount(() => {
-		window.addEventListener('resize', handleResize);
 		handleResize();
+
+		loadData();
+
+		window.addEventListener('resize', handleResize);
 		return () => {
 			window.removeEventListener('resize', handleResize);
 		};
@@ -203,8 +225,6 @@
 
 <SessionList bind:showSessionList bind:sessions {showSession} {showAllSessions} />
 <Settings bind:showSettings bind:strokeWidth bind:strokeColor />
-
-{startedAt}
 
 <main class="flex flex-col gap-1 justify-center items-center">
 	{#if mode === 'init'}
