@@ -1,9 +1,5 @@
 import confetti from 'canvas-confetti';
 
-function randomHexColor() {
-	return '#' + Math.floor(Math.random() * 16777215).toString(16);
-}
-
 function doConfetti(x: number, y: number, angle = 120) {
 	const confettiCount = 500;
 	const confettiDefaults = {
@@ -41,4 +37,4 @@ function doConfetti(x: number, y: number, angle = 120) {
 	});
 }
 
-export { randomHexColor, doConfetti };
+export { doConfetti };

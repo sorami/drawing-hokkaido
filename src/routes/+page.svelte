@@ -11,6 +11,15 @@
 	import { fade } from 'svelte/transition';
 	import { sineIn } from 'svelte/easing';
 
+	import { initializeApp } from 'firebase/app';
+	import { getFirestore } from 'firebase/firestore';
+	import { firebaseConfig } from '$lib/firebase';
+	import { collection, addDoc, Bytes } from 'firebase/firestore';
+
+	// firebase setup
+	const app = initializeApp(firebaseConfig);
+	const db = getFirestore(app);
+
 	function randomRange(min: number, max: number) {
 		return Math.random() * (max - min) + min;
 	}
@@ -44,31 +53,45 @@
 
 	// Mode
 	let mode: 'init' | 'draw' | 'log' | 'replay' = 'init';
-	$: {
-		mode;
-		startTime = Date.now();
-	}
 
 	// Drawing
 	let showSessionList = false;
 	let strokes: Stroke[] = [];
 	let sessions: Session[] = [];
-	let startTime: number = Date.now();
+	let startedAt: Date = new Date(Date.now());
+
+	$: if (mode === 'draw') {
+		startedAt = new Date(Date.now());
+	}
 
 	async function saveSession() {
 		const blob = await canvasComponent.toBlob();
-		sessions = [
-			...sessions,
-			{
-				strokes: strokes,
-				tStart: startTime,
-				tEnd: Date.now(),
-				blob,
-				blobUrl: URL.createObjectURL(blob)
-			}
-		];
+		const currSession: Session = {
+			strokes: strokes,
+			time: { startedAt, endedAt: new Date(Date.now()) },
+			canvasSize: { width: canvasWidth, height: canvasHeight },
+			blob,
+			blobUrl: URL.createObjectURL(blob)
+		};
+		sessions = [...sessions, currSession];
 		strokes = [];
 		canvasComponent.clear();
+
+		const docRefId = await writeData(currSession);
+	}
+
+	async function writeData(session: Session) {
+		try {
+			const docRef = await addDoc(collection(db, 'sessions'), {
+				strokes: session.strokes,
+				time: session.time,
+				canvasSize: session.canvasSize,
+				img: Bytes.fromUint8Array(new Uint8Array(await session.blob!.arrayBuffer()))
+			});
+			return docRef.id;
+		} catch (e) {
+			console.error('Error adding document: ', e);
+		}
 	}
 
 	function finishDrawing(event: MouseEvent) {
@@ -82,7 +105,7 @@
 	let replayCaption = '';
 	function showSession(session: Session) {
 		mode = 'log';
-		replayCaption = new Date(session.tStart).toISOString();
+		replayCaption = session.time.startedAt.toISOString();
 		canvasComponent.clear();
 		canvasComponent.drawStrokes(session.strokes);
 	}
@@ -126,11 +149,10 @@
 		}
 
 		// add a random item
-		let intervalId1: number;
-		intervalId1 = setInterval(() => {
+		const intervalId = setInterval(() => {
 			const randomItem = selectRandom();
 			if (randomItem) replayItems = [...replayItems, randomItem];
-			if (mode !== 'replay') clearInterval(intervalId1);
+			if (mode !== 'replay') clearInterval(intervalId);
 		}, REPLAY_ADD_INTERVAL);
 	}
 
@@ -150,15 +172,15 @@
 <header class="bg-gray-700 py-2 mb-3 text-white shadow flex items-center justify-between">
 	<div class="ml-6 flex gap-6 items-center">
 		<button
-			class="i-icon-park-solid-clear-format w-5 h-5 hover:opacity-75"
-			on:click={canvasComponent.clear}
-		/>
-		<button
 			class="i-material-symbols-home w-5 h-5 hover:opacity-75"
 			on:click={() => {
 				canvasComponent.clear();
 				mode = 'init';
 			}}
+		/>
+		<button
+			class="i-icon-park-solid-clear-format w-5 h-5 hover:opacity-75"
+			on:click={canvasComponent.clear}
 		/>
 	</div>
 
@@ -181,6 +203,8 @@
 
 <SessionList bind:showSessionList bind:sessions {showSession} {showAllSessions} />
 <Settings bind:showSettings bind:strokeWidth bind:strokeColor />
+
+{startedAt}
 
 <main class="flex flex-col gap-1 justify-center items-center">
 	{#if mode === 'init'}

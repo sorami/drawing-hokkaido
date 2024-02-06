@@ -2,7 +2,6 @@
 	import * as d3 from 'd3';
 	import { onMount } from 'svelte';
 	import type { Stroke } from '$lib/types';
-	import { randomHexColor } from '$lib/utils';
 
 	export let canvasWidth: number;
 	export let canvasHeight: number;
@@ -29,15 +28,14 @@
 		context.globalAlpha = globalAlpha;
 
 		for (const stroke of thisStrokes) {
-			// context.strokeStyle = randomHexColor();
 			context.strokeStyle = stroke.style;
 			context.lineWidth = stroke.width;
 			context.beginPath();
 			curve.lineStart();
 			for (const point of stroke.points) {
-				curve.point(point[0], point[1]);
+				curve.point(point.x, point.y);
 			}
-			if (stroke.points.length === 1) curve.point(stroke.points[0][0], stroke.points[0][1]);
+			if (stroke.points.length === 1) curve.point(stroke.points[0].x, stroke.points[0].y);
 			curve.lineEnd();
 			context.stroke();
 		}
@@ -57,9 +55,9 @@
 			context.beginPath();
 			curve.lineStart();
 			for (const point of stroke.points) {
-				curve.point(point[0], point[1]);
+				curve.point(point.x, point.y);
 			}
-			if (stroke.points.length === 1) curve.point(stroke.points[0][0], stroke.points[0][1]);
+			if (stroke.points.length === 1) curve.point(stroke.points[0].x, stroke.points[0].y);
 			curve.lineEnd();
 			context.stroke();
 		}
@@ -109,7 +107,7 @@
 		}
 
 		function dragged({ subject, x, y }: { subject: Stroke; x: number; y: number }) {
-			subject.points.push([x, y, Date.now()]);
+			subject.points.push({ x, y, t: Date.now() });
 			strokes = strokes;
 		}
 
