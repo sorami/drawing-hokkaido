@@ -171,7 +171,6 @@
 				blobUrl
 			});
 		});
-		console.log('loadedSession', loadedSession);
 		sessions = loadedSession;
 	}
 
