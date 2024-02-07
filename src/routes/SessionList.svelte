@@ -29,7 +29,7 @@
 				{#each sessions.sort((a, b) => b.time.startedAt.getTime() - a.time.startedAt.getTime()) as session}
 					<li>
 						<button class="bg-gray-700 underline" on:click={() => showSession(session)}>
-							{session.time.startedAt.toISOString()}
+							{session.time.startedAt.toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' })}
 						</button>
 					</li>
 				{/each}

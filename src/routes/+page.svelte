@@ -105,7 +105,7 @@
 	let replayCaption = '';
 	function showSession(session: Session) {
 		mode = 'log';
-		replayCaption = session.time.startedAt.toISOString();
+		replayCaption = session.time.startedAt.toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' });
 		canvasComponent.clear();
 		canvasComponent.drawStrokes(session.strokes);
 	}
