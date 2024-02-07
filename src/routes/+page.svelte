@@ -2,8 +2,9 @@
 	import '@unocss/reset/tailwind-compat.css';
 	import 'virtual:uno.css';
 	import '../app.css';
-	import type { Stroke, Session } from '$lib/types';
+	import type { Stroke, Session, ModeOptions } from '$lib/types';
 	import { doConfetti } from '$lib/utils';
+	import Header from './Header.svelte';
 	import DrawingCanvas from './DrawingCanvas.svelte';
 	import SessionList from './SessionList.svelte';
 	import Settings from './Settings.svelte';
@@ -15,6 +16,9 @@
 	import { getFirestore } from 'firebase/firestore';
 	import { firebaseConfig } from '$lib/firebase';
 	import { collection, addDoc, Bytes, getDocs } from 'firebase/firestore';
+
+	// url params
+	let showHeader = false;
 
 	// firebase setup
 	const app = initializeApp(firebaseConfig);
@@ -52,7 +56,7 @@
 	};
 
 	// Mode
-	let mode: 'init' | 'draw' | 'log' | 'replay' = 'init';
+	let mode: ModeOptions = 'init';
 
 	// Drawing
 	let showSessionList = false;
@@ -177,6 +181,11 @@
 	onMount(() => {
 		handleResize();
 
+		const urlParams = new URLSearchParams(window.location.search);
+		if (urlParams.has('header')) {
+			showHeader = true;
+		}
+
 		loadData();
 
 		window.addEventListener('resize', handleResize);
@@ -190,37 +199,9 @@
 	<title>りんかくをかさねる - ななめせんなめせん</title>
 </svelte:head>
 
-<header class="bg-gray-700 py-2 mb-3 text-white shadow flex items-center justify-between">
-	<div class="ml-6 flex gap-6 items-center">
-		<button
-			class="i-material-symbols-home w-5 h-5 hover:opacity-75"
-			on:click={() => {
-				canvasComponent.clear();
-				mode = 'init';
-			}}
-		/>
-		<button
-			class="i-icon-park-solid-clear-format w-5 h-5 hover:opacity-75"
-			on:click={canvasComponent.clear}
-		/>
-	</div>
-
-	<div class="flex items-center gap-3">
-		<h1 class="text-center text-xl font-bold">「北海道のかたち」を描いてください</h1>
-	</div>
-
-	<div class="mr-6 flex gap-6 items-center">
-		<button class="i-material-symbols-replay w-6 h-6 hover:opacity-75" on:click={() => replay()} />
-		<button
-			class="i-material-symbols-list-alt w-6 h-6 hover:opacity-75"
-			on:click={() => (showSessionList = !showSessionList)}
-		/>
-		<button
-			class="i-material-symbols-settings w-5 h-5 hover:opacity-75"
-			on:click={() => (showSettings = !showSettings)}
-		/>
-	</div>
-</header>
+{#if showHeader}
+	<Header bind:mode bind:showSessionList bind:showSettings {replay} {canvasComponent} />
+{/if}
 
 <SessionList bind:showSessionList bind:sessions {showSession} {showAllSessions} />
 <Settings bind:showSettings bind:strokeWidth bind:strokeColor />

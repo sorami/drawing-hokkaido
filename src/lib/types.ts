@@ -18,4 +18,6 @@ type Session = {
 	blobUrl: string;
 };
 
-export type { Stroke, Session };
+type ModeOptions = 'init' | 'draw' | 'log' | 'replay';
+
+export type { Stroke, Session, ModeOptions };
