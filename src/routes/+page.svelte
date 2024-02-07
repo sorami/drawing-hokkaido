@@ -230,7 +230,12 @@
 		<div class="absolute z-10">
 			<button
 				class="bg-gray-700 text-white px-8 py-6 rounded-full shadow-xl hover:opacity-75 text-5xl"
-				on:click={() => (mode = 'draw')}>はじめる</button
+				on:click={() => (mode = 'draw')}
+			>
+				<div class="flex gap-3 items-center">
+					<div class="i-fluent-hand-draw-20-filled" />
+					<div>はじめる</div>
+				</div></button
 			>
 		</div>
 	{/if}
@@ -285,7 +290,10 @@
 					class="bg-gray-700 text-white px-6 py-2 rounded-full shadow-xl hover:opacity-75 text-xl"
 					on:click={finishDrawing}
 				>
-					終わる 🚀
+					<div class="flex gap-2 items-center">
+						<div class="i-material-symbols-check-circle" />
+						<div>おわる</div>
+					</div>
 				</button>
 			</div>
 		{/if}
