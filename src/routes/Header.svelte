@@ -9,7 +9,7 @@
 	export let canvasComponent: DrawingCanvas;
 </script>
 
-<header class="bg-gray-700 py-2 mb-3 text-white shadow flex items-center justify-between">
+<header class="bg-gray-700 py-2 text-white shadow flex items-center justify-between">
 	<div class="ml-6 flex gap-6 items-center">
 		<button
 			class="i-material-symbols-home w-5 h-5 hover:opacity-75"

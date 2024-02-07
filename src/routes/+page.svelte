@@ -39,7 +39,17 @@
 
 	// Canvas - always keep the aspect ratio
 	let canvasComponent: DrawingCanvas;
-	const canvasMargin = { width: 30, height: 80 };
+
+	function getCanvasMargin(showHeader: boolean): { width: number; height: number } {
+		return showHeader ? { width: 30, height: 80 } : { width: 30, height: 30 };
+	}
+	let canvasMargin = getCanvasMargin(showHeader);
+	$: {
+		showHeader;
+		canvasMargin = getCanvasMargin(showHeader);
+		handleResize();
+	}
+
 	const canvasAspectRatio = 2360 / 1640; // iPad Air - 2360 x 1640
 	let canvasWidth = 2360 / 2 - canvasMargin.width;
 	let canvasHeight = canvasWidth / canvasAspectRatio;
@@ -178,15 +188,18 @@
 		sessions = loadedSession;
 	}
 
-	onMount(() => {
+	onMount(async () => {
 		handleResize();
+		await loadData();
 
 		const urlParams = new URLSearchParams(window.location.search);
 		if (urlParams.has('header')) {
 			showHeader = true;
 		}
-
-		loadData();
+		if (urlParams.has('mode') && urlParams.get('mode') === 'replay') {
+			mode = 'replay';
+			replay();
+		}
 
 		window.addEventListener('resize', handleResize);
 		return () => {
@@ -206,92 +219,98 @@
 <SessionList bind:showSessionList bind:sessions {showSession} {showAllSessions} />
 <Settings bind:showSettings bind:strokeWidth bind:strokeColor />
 
-<main class="flex flex-col gap-1 justify-center items-center">
-	{#if mode === 'init'}
-		<div class="absolute z-10">
-			<button
-				class="bg-gray-700 text-white px-8 py-6 rounded-full shadow-xl hover:opacity-75 text-5xl"
-				on:click={() => (mode = 'draw')}
-			>
-				<div class="flex gap-3 items-center">
-					<div class="i-fluent-hand-draw-20-filled" />
-					<div>はじめる</div>
-				</div></button
-			>
-		</div>
-	{/if}
-
-	<div
-		class="relative rounded-lg"
-		class:bg-gray-400={mode === 'init'}
-		class:bg-gray-300={mode === 'log'}
-	>
-		<div class={mode === 'draw' ? '' : 'pointer-events-none'}>
-			<div>
-				<DrawingCanvas
-					bind:this={canvasComponent}
-					{canvasWidth}
-					{canvasHeight}
-					{strokeWidth}
-					{strokeColor}
-					bind:strokes
-				/>
+<main
+	class={!showHeader
+		? 'grid place-items-center h-100vh'
+		: 'grid place-items-center h-[calc(100vh-3em)]'}
+>
+	<div class="flex flex-col gap-1 justify-center items-center">
+		{#if mode === 'init'}
+			<div class="absolute z-10">
+				<button
+					class="bg-gray-700 text-white px-8 py-6 rounded-full shadow-xl hover:opacity-75 text-5xl"
+					on:click={() => (mode = 'draw')}
+				>
+					<div class="flex gap-3 items-center">
+						<div class="i-fluent-hand-draw-20-filled" />
+						<div>はじめる</div>
+					</div></button
+				>
 			</div>
-		</div>
+		{/if}
 
-		{#if mode == 'replay'}
-			<div class="absolute top-0 left-0 w-full h-full">
-				<div id="image-container" class="relative">
-					{#each replayItems as replayItem (replayItem.key)}
-						<div
-							class="absolute top-0 left-0"
-							in:fade={{ duration: replayFadeInDuration(), easing: sineIn }}
-							on:introend={() => {
-								// immediately remove the item
-								replayItems = replayItems.filter((d) => d.key !== replayItem.key);
-								// keep track of the items in fading out state
-								fadingOutItemKeys.add(replayItem.key);
-							}}
-							out:fade={{ duration: replayFadeOutDuration(), easing: sineIn }}
-							on:outroend={() => {
-								// fade out is done, remove the item
-								fadingOutItemKeys.delete(replayItem.key);
-							}}
-						>
-							<img alt={replayItem.key} src={replayItem.src} />
-						</div>
-					{/each}
+		<div
+			class="relative rounded-lg"
+			class:bg-gray-400={mode === 'init'}
+			class:bg-gray-300={mode === 'log'}
+		>
+			<div class={mode === 'draw' ? '' : 'pointer-events-none'}>
+				<div>
+					<DrawingCanvas
+						bind:this={canvasComponent}
+						{canvasWidth}
+						{canvasHeight}
+						{strokeWidth}
+						{strokeColor}
+						bind:strokes
+					/>
 				</div>
 			</div>
-		{/if}
 
-		{#if mode === 'draw'}
-			<div class="absolute bottom-3 right-3">
-				<button
-					class="bg-gray-700 text-white px-6 py-2 rounded-full shadow-xl hover:opacity-75 text-xl"
-					on:click={finishDrawing}
-				>
-					<div class="flex gap-2 items-center">
-						<div class="i-material-symbols-check-circle" />
-						<div>おわる</div>
+			{#if mode == 'replay'}
+				<div class="absolute top-0 left-0 w-full h-full">
+					<div id="image-container" class="relative">
+						{#each replayItems as replayItem (replayItem.key)}
+							<div
+								class="absolute top-0 left-0"
+								in:fade={{ duration: replayFadeInDuration(), easing: sineIn }}
+								on:introend={() => {
+									// immediately remove the item
+									replayItems = replayItems.filter((d) => d.key !== replayItem.key);
+									// keep track of the items in fading out state
+									fadingOutItemKeys.add(replayItem.key);
+								}}
+								out:fade={{ duration: replayFadeOutDuration(), easing: sineIn }}
+								on:outroend={() => {
+									// fade out is done, remove the item
+									fadingOutItemKeys.delete(replayItem.key);
+								}}
+							>
+								<img alt={replayItem.key} src={replayItem.src} />
+							</div>
+						{/each}
 					</div>
-				</button>
-			</div>
-		{/if}
+				</div>
+			{/if}
 
-		{#if mode === 'log'}
-			<div class="absolute top-5 left-5 text-gray-700 text-xl">{replayCaption}</div>
-			<div class="absolute bottom-3 right-3">
-				<button
-					class="bg-gray-700 text-white px-6 py-2 rounded-full shadow-xl hover:opacity-75 text-xl"
-					on:click={() => {
-						canvasComponent.clear();
-						mode = 'init';
-					}}
-				>
-					もどる
-				</button>
-			</div>
-		{/if}
+			{#if mode === 'draw'}
+				<div class="absolute bottom-3 right-3">
+					<button
+						class="bg-gray-700 text-white px-6 py-2 rounded-full shadow-xl hover:opacity-75 text-xl"
+						on:click={finishDrawing}
+					>
+						<div class="flex gap-2 items-center">
+							<div class="i-material-symbols-check-circle" />
+							<div>おわる</div>
+						</div>
+					</button>
+				</div>
+			{/if}
+
+			{#if mode === 'log'}
+				<div class="absolute top-5 left-5 text-gray-700 text-xl">{replayCaption}</div>
+				<div class="absolute bottom-3 right-3">
+					<button
+						class="bg-gray-700 text-white px-6 py-2 rounded-full shadow-xl hover:opacity-75 text-xl"
+						on:click={() => {
+							canvasComponent.clear();
+							mode = 'init';
+						}}
+					>
+						もどる
+					</button>
+				</div>
+			{/if}
+		</div>
 	</div>
 </main>
