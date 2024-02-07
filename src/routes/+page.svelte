@@ -54,6 +54,8 @@
 	let canvasWidth = 2360 / 2 - canvasMargin.width;
 	let canvasHeight = canvasWidth / canvasAspectRatio;
 	const handleResize = () => {
+		// if widndow does not exist, return
+		if (typeof window === 'undefined') return;
 		if (window.innerHeight < window.innerWidth) {
 			// landscape
 			canvasHeight = Math.min(window.innerHeight, 1640 / 2) - canvasMargin.height;
