@@ -28,8 +28,8 @@
 		return Math.random() * (max - min) + min;
 	}
 
-	const REPLAY_ADD_INTERVAL = 1000;
-	const replayFadeInDuration = () => randomRange(1000, 4000);
+	const REPLAY_ADD_INTERVAL = 2000;
+	const replayFadeInDuration = () => randomRange(2000, 8000);
 	const replayFadeOutDuration = () => randomRange(1000, 2000);
 
 	// Settings
