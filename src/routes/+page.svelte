@@ -13,7 +13,11 @@
 	import { sineIn } from 'svelte/easing';
 
 	import { initializeApp } from 'firebase/app';
-	import { getFirestore } from 'firebase/firestore';
+	import {
+		initializeFirestore,
+		persistentLocalCache,
+		persistentMultipleTabManager
+	} from 'firebase/firestore';
 	import { firebaseConfig } from '$lib/firebase';
 	import { collection, addDoc, Bytes, getDocs } from 'firebase/firestore';
 
@@ -21,8 +25,11 @@
 	let showHeader = false;
 
 	// firebase setup
+	// persistence cache for offline support
 	const app = initializeApp(firebaseConfig);
-	const db = getFirestore(app);
+	const db = initializeFirestore(app, {
+		localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
+	});
 
 	const REPLAY_ADD_INTERVAL = 2000;
 	const replayFadeInDuration = () => randomInRange(2000, 6000);
