@@ -189,7 +189,7 @@
 
 	onMount(async () => {
 		handleResize();
-		await loadData();
+		await loadData().catch((e) => console.error(e));
 
 		const urlParams = new URLSearchParams(window.location.search);
 		if (urlParams.has('header')) {
