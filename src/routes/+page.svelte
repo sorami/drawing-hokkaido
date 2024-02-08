@@ -102,12 +102,31 @@
 				strokes: session.strokes,
 				time: session.time,
 				canvasSize: session.canvasSize,
+				userAgent: navigator.userAgent,
 				img: Bytes.fromUint8Array(new Uint8Array(await session.blob!.arrayBuffer()))
 			});
 			return docRef.id;
 		} catch (e) {
 			console.error('Error adding document: ', e);
 		}
+	}
+
+	async function loadData() {
+		const loadedSession: Session[] = [];
+		const querySnapshot = await getDocs(collection(db, 'sessions'));
+		querySnapshot.forEach((doc) => {
+			const data = doc.data();
+			const blob = new Blob([data.img.toUint8Array().buffer], { type: 'image/png' });
+			const blobUrl = URL.createObjectURL(blob);
+			loadedSession.push({
+				strokes: data.strokes,
+				time: { startedAt: data.time.startedAt.toDate(), endedAt: data.time.endedAt.toDate() },
+				canvasSize: data.canvasSize,
+				blob,
+				blobUrl
+			});
+		});
+		sessions = loadedSession;
 	}
 
 	function finishDrawing(event: MouseEvent) {
@@ -170,24 +189,6 @@
 			if (randomItem) replayItems = [...replayItems, randomItem];
 			if (mode !== 'replay') clearInterval(intervalId);
 		}, REPLAY_ADD_INTERVAL);
-	}
-
-	async function loadData() {
-		const loadedSession: Session[] = [];
-		const querySnapshot = await getDocs(collection(db, 'sessions'));
-		querySnapshot.forEach((doc) => {
-			const data = doc.data();
-			const blob = new Blob([data.img.toUint8Array().buffer], { type: 'image/png' });
-			const blobUrl = URL.createObjectURL(blob);
-			loadedSession.push({
-				strokes: data.strokes,
-				time: { startedAt: data.time.startedAt.toDate(), endedAt: data.time.endedAt.toDate() },
-				canvasSize: data.canvasSize,
-				blob,
-				blobUrl
-			});
-		});
-		sessions = loadedSession;
 	}
 
 	onMount(async () => {
