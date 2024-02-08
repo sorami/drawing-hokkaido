@@ -3,7 +3,7 @@
 	import 'virtual:uno.css';
 	import '../app.css';
 	import type { Stroke, Session, ModeOptions } from '$lib/types';
-	import { doConfetti } from '$lib/utils';
+	import { randomInRange, doConfetti } from '$lib/utils';
 	import Header from './Header.svelte';
 	import DrawingCanvas from './DrawingCanvas.svelte';
 	import SessionList from './SessionList.svelte';
@@ -24,13 +24,9 @@
 	const app = initializeApp(firebaseConfig);
 	const db = getFirestore(app);
 
-	function randomRange(min: number, max: number) {
-		return Math.random() * (max - min) + min;
-	}
-
 	const REPLAY_ADD_INTERVAL = 2000;
-	const replayFadeInDuration = () => randomRange(2000, 8000);
-	const replayFadeOutDuration = () => randomRange(1000, 2000);
+	const replayFadeInDuration = () => randomInRange(2000, 6000);
+	const replayFadeOutDuration = () => randomInRange(1000, 2000);
 
 	// Settings
 	let showSettings = false;

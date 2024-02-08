@@ -1,5 +1,9 @@
 import confetti from 'canvas-confetti';
 
+function randomInRange(min: number, max: number) {
+	return Math.random() * (max - min) + min;
+}
+
 function doConfetti(x: number, y: number, angle = 120) {
 	const confettiCount = 500;
 	const confettiDefaults = {
@@ -37,4 +41,4 @@ function doConfetti(x: number, y: number, angle = 120) {
 	});
 }
 
-export { doConfetti };
+export { randomInRange, doConfetti };
