@@ -290,7 +290,7 @@
 			{/if}
 
 			{#if mode === 'draw'}
-				<div class="absolute bottom-3 right-3">
+				<div class="absolute bottom-8 right-8">
 					<button
 						class="bg-gray-700 text-white px-6 py-2 rounded-full shadow-xl hover:opacity-75 text-xl"
 						on:click={finishDrawing}
