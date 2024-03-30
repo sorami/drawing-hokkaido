@@ -55,17 +55,28 @@
 	}
 
 	function downloadSession(session: Session) {
+		const name = session.time.startedAt.toISOString();
+
 		const a = document.createElement('a');
 		a.href = session.blobUrl;
-		a.download = `${session.time.startedAt}.png`;
+		a.download = `${name}.png`;
 		a.click();
+
+		// download `session` as a JSON file
+		const json = JSON.stringify(session, null, 2);
+		const blob = new Blob([json], { type: 'application/json' });
+		const jsonUrl = URL.createObjectURL(blob);
+		const aJson = document.createElement('a');
+		aJson.href = jsonUrl;
+		aJson.download = `${name}.json`;
+		aJson.click();
 	}
 
 	async function downloadAllSessions() {
 		for (const session of sessions) {
 			downloadSession(session);
 			// wait for a while to avoid browser crash
-			await new Promise((resolve) => setTimeout(resolve, 100));
+			await new Promise((resolve) => setTimeout(resolve, 300));
 		}
 	}
 </script>
